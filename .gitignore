@@ -1,0 +1,43 @@
+# .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+*.user
+*.suo
+*.userprefs
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.DotSettings.user
+
+# Build / publish
+artifacts/
+publish/
+*.publishsettings
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coverlet.json
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# OS / editor cruft
+Thumbs.db
+desktop.ini
+*.swp
+
+# Local secrets / env
+.env
+*.local.json
