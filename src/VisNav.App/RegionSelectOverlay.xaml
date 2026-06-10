@@ -1,0 +1,30 @@
+<Window x:Class="VisNav.App.RegionSelectOverlay"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="#33000000"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Cursor="Cross"
+        Focusable="True"
+        Title="VisNav Read Region"
+        MouseLeftButtonDown="OnDown"
+        MouseMove="OnMove"
+        MouseLeftButtonUp="OnUp"
+        PreviewKeyDown="OnKeyDown">
+    <Canvas x:Name="RootCanvas">
+        <TextBlock x:Name="Hint" Foreground="White" FontSize="18" Canvas.Left="20" Canvas.Top="20"
+                   Text="Drag a box around the text to read.  Esc to cancel." />
+        <Rectangle x:Name="SelRect" Stroke="#FFE000" StrokeThickness="2"
+                   Fill="#3300E5FF" Visibility="Collapsed" IsHitTestVisible="False" />
+
+        <!-- Cancel button (positioned at the top-center of the primary screen in code). -->
+        <Border x:Name="CancelButton" Background="#1E1E1E" BorderBrush="#FFE000" BorderThickness="2"
+                CornerRadius="6" Padding="18,8" Cursor="Hand"
+                MouseLeftButtonDown="OnCancelClick">
+            <TextBlock Text="✕  Cancel" Foreground="White" FontSize="18" />
+        </Border>
+    </Canvas>
+</Window>

@@ -7,36 +7,80 @@ accessibility-first design — high contrast, large targets, keyboard/hotkey dri
 > Personal motivation: built for anyone who has trouble seeing. Inspired in part by a friend with
 > Stargardt's disease (central vision loss), but designed for low vision generally.
 
-## Features (planned)
+VisNav runs in the **system tray** (crosshair icon). Open **Settings** from the tray menu to
+toggle tools and rebind hotkeys. Only one instance runs at a time.
 
-- **Crosshair cursor** — large, high-contrast crosshair lines that follow the pointer, easy to
-  locate in peripheral vision (which conditions like Stargardt's tend to preserve). Optional
-  screen dimming to make it pop.
-- **Magnifier** — a smooth lens that follows the cursor, powered by the native Windows
-  Magnification API (the same engine behind Windows Magnifier). Adjustable zoom and lens size.
-- **Narrator** — detects on-screen text blocks (paragraphs, headings) via Windows UI Automation,
-  drops a large "▶ Read" button on each group, and reads it aloud with the OS voices. Works over
-  the browser and other apps without injecting into the page.
+## Features
 
-All features live in a single tray app and can be toggled on/off independently.
+### Crosshair cursor
+A thin, high-contrast circle centered on the mouse pointer that follows it everywhere — easy to
+locate without obscuring content. Configurable **color** (green / red / white-on-black / cyan /
+pink), **radius**, **thickness**, and **opacity**. It's excluded from screen capture, so it never
+shows up inside the magnifier or screenshots.
+
+### Magnifier
+A GPU-accelerated lens (Windows Magnification API) that floats next to the cursor — its
+bottom-left corner sits at the pointer tip. Configurable **starting zoom** and **lens size** (drag
+the corner of the on-screen diagram). The magnified cursor shows inside the lens.
+
+- **Toggle:** `Ctrl + Shift + F`
+- **Zoom while active:** hold `Shift` and scroll the mouse wheel (up = in, down = out)
+
+### Narrator (text-to-speech)
+Two ways to have on-screen text read aloud (offline, via Windows SAPI voices):
+
+- **Scan & hover** (`Ctrl + Shift + R`) — finds text blocks on the focused window via UI
+  Automation; move the cursor over a block to highlight it, click to read it. Esc dismisses.
+  A **grouping intensity** slider controls how tightly text is grouped.
+- **Read a region** (`Ctrl + Shift + Q`, or the tray menu) — drag a box around *any* text, even
+  in apps with no accessible text (Electron apps, images, games, PDFs). It's OCR'd
+  (Windows.Media.Ocr) and read aloud, with the cropped area kept highlighted while it reads.
+  Esc or the ✕ button cancels.
+- **Pause/resume:** `Ctrl + Shift + P` · **Stop:** `Ctrl + Shift + X`. The most recent request
+  always takes priority over any current speech.
+
+All hotkeys are rebindable in Settings. Each tool can be toggled independently.
+
+## Requirements
+
+- Windows 10 (version 2004 / build 19041) or Windows 11.
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) to build/run from source.
+- A speech voice (Windows ships with at least one) and the English OCR language pack for the
+  read-a-region feature (both included by default on most installs).
+
+## Build & run
+
+From the repo root:
+
+```powershell
+./run.ps1            # Debug build, launches the tray app
+./run.ps1 -Release   # Release build
+```
+
+Or double-click **`run.cmd`**, or use the SDK directly:
+
+```powershell
+dotnet run --project src/VisNav.App/VisNav.App.csproj
+```
+
+Settings are saved to `%AppData%\VisNav\settings.json`.
 
 ## Platform & stack
 
-- **Windows only** (Windows 10/11).
-- **.NET 8 + WPF** for transparent, click-through, always-on-top overlay windows.
-- **Windows Magnification API** (magnifier), **UI Automation** (narrator text grouping),
-  **System.Speech / OS voices** (text-to-speech).
-
-## Status
-
-🚧 Early scaffolding. See [`docs/design.md`](docs/design.md) for the architecture and build plan.
+- **Windows only**, **.NET 8 + WPF** (transparent, click-through, always-on-top overlays).
+- **Windows Magnification API** (magnifier), **UI Automation** (text scanning),
+  **Windows.Media.Ocr** (region OCR), **System.Speech / SAPI** (text-to-speech).
 
 ## Repo layout
 
 ```
 src/
-  VisNav.App/    WPF tray app: settings window, hotkeys, feature toggles, overlays
-  VisNav.Core/   settings persistence, Win32 interop wrappers, shared models
-docs/            design notes
-tests/           unit tests
+  VisNav.App/    WPF tray app: settings window, hotkeys, overlays, magnifier, narrator, OCR
+  VisNav.Core/   settings model + JSON persistence
+tests/
+  VisNav.Core.Tests/   unit tests
+docs/            design notes (design.md) + narrator research (research-narrator.md)
+run.ps1 / run.cmd      build-and-launch helpers
 ```
+
+See [`docs/design.md`](docs/design.md) for architecture and the build plan.

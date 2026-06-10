@@ -1,0 +1,19 @@
+<Window x:Class="VisNav.App.ReadingHighlightOverlay"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        IsHitTestVisible="False"
+        ResizeMode="NoResize"
+        Focusable="False"
+        Title="VisNav Reading">
+    <Canvas x:Name="RootCanvas" IsHitTestVisible="False">
+        <!-- Same light-blue fill + yellow frame as the region selector. -->
+        <Rectangle x:Name="Highlight" Stroke="#FFE000" StrokeThickness="2"
+                   Fill="#3300E5FF" Visibility="Collapsed" IsHitTestVisible="False" />
+    </Canvas>
+</Window>
