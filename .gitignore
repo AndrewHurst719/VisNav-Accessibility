@@ -19,6 +19,7 @@ x86/
 # Build / publish
 artifacts/
 publish/
+dist/
 *.publishsettings
 
 # Test results

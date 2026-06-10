@@ -6,12 +6,19 @@ browser, and any other app, and provides easy to operate assistive tools. Built 
 VisNav runs in the **system tray** (crosshair icon). Open **Settings** from the tray menu to
 toggle tools and rebind hotkeys.
 
-## Download & run
-1. Download latest release.
-2. Extract zip file in location chosen.
-3. Run "VisNav.exe".
+## ⬇️ Download & run (nothing to install)
 
-Settings are saved to `%AppData%\VisNav\settings.json`.
+1. Open the **[latest release](https://github.com/AndrewHurst719/VisNav-Accessibility/releases/latest)**
+   and, under **Assets**, download **`VisNav-win-x64.zip`**.
+2. Right-click the downloaded zip → **Extract All…**
+3. Open the extracted folder and double-click **`VisNav.exe`**.
+   - If Windows shows a blue *"Windows protected your PC"* box, click **More info → Run anyway**
+     (the app simply isn't code-signed yet).
+4. The Settings window opens and a small **crosshair icon** appears in your system tray
+   (bottom-right, maybe under the `^` arrow). To quit: right-click that icon → **Exit**.
+
+No .NET or other software required — everything is bundled in the one file. (There's also a
+`HOW TO RUN.txt` inside the zip.) Settings are saved to `%AppData%\VisNav\settings.json`.
 
 ## Features
 
@@ -22,10 +29,11 @@ pink), **radius**, **thickness**, and **opacity**. It's excluded from screen cap
 shows up inside the magnifier or screenshots.
 
 ### Magnifier
-A GPU-accelerated lens (Windows Magnification API) that floats next to the cursor — its corner sits at the pointer tip. Configurable **starting zoom** and **lens size** (drag
-the corner of the on-screen diagram). The magnified cursor shows inside the lens.
+A GPU-accelerated lens (Windows Magnification API) that floats next to the cursor — its corner sits
+at the pointer tip. Configurable **starting zoom** and **lens size** (drag the corner of the
+on-screen diagram). The magnified cursor shows inside the lens.
 
-- **Toggle:** `Ctrl + Shift + F` as default
+- **Toggle:** `Ctrl + Shift + F` (default)
 - **Zoom while active:** hold `Shift` and scroll the mouse wheel (up = in, down = out)
 
 ### Narrator (text-to-speech)
@@ -46,10 +54,20 @@ All hotkeys are rebindable in Settings. Each tool can be toggled independently.
 ## Requirements
 
 - Windows 10 (version 2004 / build 19041) or Windows 11.
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) to build/run from source.
 - A speech voice (Windows ships with at least one) and the English OCR language pack for the
   read-a-region feature (both included by default on most installs).
 
+> The downloadable release is self-contained — end users need nothing else installed. The
+> .NET 8 SDK is only required to build from source (below).
+
+## Build from source (developers)
+
+Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0). From the repo root:
+
+```powershell
+./run.ps1            # Debug build, launches the tray app  (or double-click run.cmd)
+./publish.ps1        # self-contained release zip -> dist/VisNav-win-x64.zip
+```
 
 ## Platform & stack
 
@@ -66,5 +84,5 @@ src/
 tests/
   VisNav.Core.Tests/   unit tests
 docs/            design notes (design.md) + narrator research (research-narrator.md)
-run.ps1 / run.cmd      build-and-launch helpers
+run.ps1 / run.cmd / publish.ps1   build, launch, and package helpers
 ```
