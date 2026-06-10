@@ -10,6 +10,12 @@ namespace VisNav.App;
 /// </summary>
 public sealed class NarratorService : IDisposable
 {
+    // SAPI clips the first word or two while the audio device warms up (worse at high rates).
+    // Prepending a leading silence lets the warm-up eat the silence instead of the speech.
+    // SAPI honors roughly half the requested break, so ~700ms yields ~420ms of real silence
+    // (measured) — enough to cover device warm-up without a sluggish lead-in.
+    private const int LeadingSilenceMs = 700;
+
     private readonly SpeechSynthesizer _synth = new();
 
     /// <summary>Raised (on the UI thread is NOT guaranteed) when an utterance finishes or is cancelled.</summary>
@@ -57,7 +63,12 @@ public sealed class NarratorService : IDisposable
         if (string.IsNullOrWhiteSpace(text))
             return null;
         Stop();
-        return _synth.SpeakAsync(text);
+
+        // Leading silence avoids the first-word clip; AppendText also escapes the content.
+        var builder = new PromptBuilder();
+        builder.AppendBreak(TimeSpan.FromMilliseconds(LeadingSilenceMs));
+        builder.AppendText(text);
+        return _synth.SpeakAsync(builder);
     }
 
     /// <summary>Pauses if speaking, resumes if paused (a global play/pause toggle).</summary>
