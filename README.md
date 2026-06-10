@@ -86,3 +86,8 @@ tests/
 docs/            design notes (design.md) + narrator research (research-narrator.md)
 run.ps1 / run.cmd / publish.ps1   build, launch, and package helpers
 ```
+
+## License
+
+Open source under the [MIT License](LICENSE) — free to use, modify, and distribute.
+Contributions welcome.
