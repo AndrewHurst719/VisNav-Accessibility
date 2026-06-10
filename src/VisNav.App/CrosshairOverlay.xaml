@@ -10,11 +10,15 @@
         IsHitTestVisible="False"
         ResizeMode="NoResize"
         Focusable="False"
+        SizeToContent="Manual"
         Title="VisNav Crosshair">
-    <Canvas x:Name="RootCanvas" IsHitTestVisible="False">
-        <!-- Outline ring (only shown for the White-on-black preset), drawn behind. -->
-        <Ellipse x:Name="OutlineRing" Fill="Transparent" Visibility="Collapsed" IsHitTestVisible="False" />
-        <!-- Primary ring. -->
-        <Ellipse x:Name="Ring" Fill="Transparent" IsHitTestVisible="False" />
-    </Canvas>
+    <!-- A small window that follows the cursor. Under Per-Monitor-V2 the window adopts the
+         scale of whatever monitor it's on, so the ring is correctly sized + centered on every
+         monitor regardless of each one's display scaling. -->
+    <Grid IsHitTestVisible="False">
+        <Ellipse x:Name="OutlineRing" Fill="Transparent" Visibility="Collapsed"
+                 HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+        <Ellipse x:Name="Ring" Fill="Transparent"
+                 HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+    </Grid>
 </Window>

@@ -1,55 +1,47 @@
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
 using VisNav.App.Interop;
 using VisNav.Core.Settings;
 
 namespace VisNav.App;
 
 /// <summary>
-/// A full-virtual-screen, transparent, click-through overlay that draws a thin
-/// circle centered on the mouse cursor and follows it every frame.
+/// A small, transparent, click-through window that follows the cursor and draws a thin ring
+/// centered on the pointer. The whole app is Per-Monitor-V2 DPI aware, so this window adopts
+/// the scale of whatever monitor the cursor is on — the ring stays correctly sized and
+/// centered across monitors with different display scaling.
 /// </summary>
 public partial class CrosshairOverlay : Window
 {
-    private CrosshairSettings _settings = new();
-    private bool _rendering;
+    private const double SizePadding = 12; // DIP room for stroke + outline + anti-aliasing
 
-    // Device-pixels -> DIP scale (filled once the HWND exists). Identity until then.
-    private double _dipScaleX = 1.0;
-    private double _dipScaleY = 1.0;
+    private readonly DispatcherTimer _timer;
+    private CrosshairSettings _settings = new();
+    private IntPtr _handle;
+    private bool _running;
 
     public CrosshairOverlay()
     {
         InitializeComponent();
-
-        // Cover every monitor (virtual screen), in DIPs.
-        Left = SystemParameters.VirtualScreenLeft;
-        Top = SystemParameters.VirtualScreenTop;
-        Width = SystemParameters.VirtualScreenWidth;
-        Height = SystemParameters.VirtualScreenHeight;
+        _timer = new DispatcherTimer(DispatcherPriority.Render)
+        {
+            Interval = TimeSpan.FromMilliseconds(16),
+        };
+        _timer.Tick += (_, _) => Follow();
     }
 
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
-
         var source = (HwndSource)PresentationSource.FromVisual(this)!;
-        NativeMethods.MakeClickThrough(source.Handle);
-
-        // Keep the crosshair out of the magnifier lens (and other screen captures);
-        // it still renders normally on screen.
-        NativeMethods.ExcludeFromCapture(source.Handle);
-
-        // device px -> DIP: multiply by these (TransformFromDevice is 1/dpiScale).
-        var m = source.CompositionTarget.TransformFromDevice;
-        _dipScaleX = m.M11;
-        _dipScaleY = m.M22;
-
+        _handle = source.Handle;
+        NativeMethods.MakeClickThrough(_handle);
+        NativeMethods.ExcludeFromCapture(_handle); // keep it out of the magnifier lens / screenshots
     }
 
-    /// <summary>Applies color / radius / thickness to the ring visuals.</summary>
+    /// <summary>Applies color / radius / thickness / opacity and sizes the window to the ring.</summary>
     public void Apply(CrosshairSettings settings)
     {
         _settings = settings;
@@ -63,15 +55,14 @@ public partial class CrosshairOverlay : Window
         Ring.Stroke = new SolidColorBrush(stroke);
         Ring.StrokeThickness = settings.OuterThickness;
         Ring.Opacity = opacity;
-        OutlineRing.Opacity = opacity;
 
         if (CrosshairPalette.HasOutline(settings.Color))
         {
             OutlineRing.Width = diameter;
             OutlineRing.Height = diameter;
             OutlineRing.Stroke = new SolidColorBrush(CrosshairPalette.OutlineColor);
-            // Outline extends ~2 DIP beyond the ring on each side.
             OutlineRing.StrokeThickness = settings.OuterThickness + 4;
+            OutlineRing.Opacity = opacity;
             OutlineRing.Visibility = Visibility.Visible;
         }
         else
@@ -79,59 +70,48 @@ public partial class CrosshairOverlay : Window
             OutlineRing.Visibility = Visibility.Collapsed;
         }
 
-        UpdatePosition();
+        // Window just big enough to hold the ring (DIP). It renders at the current monitor's scale.
+        double side = diameter + settings.OuterThickness + SizePadding;
+        Width = side;
+        Height = side;
     }
 
-    /// <summary>Shows the overlay and begins tracking the cursor.</summary>
     public void Start()
     {
         if (!IsVisible)
             Show();
-
-        if (!_rendering)
+        if (!_running)
         {
-            CompositionTarget.Rendering += OnRendering;
-            _rendering = true;
+            _timer.Start();
+            _running = true;
         }
-
-        UpdatePosition();
+        Follow();
     }
 
-    /// <summary>Stops tracking and hides the overlay.</summary>
     public void Stop()
     {
-        if (_rendering)
+        if (_running)
         {
-            CompositionTarget.Rendering -= OnRendering;
-            _rendering = false;
+            _timer.Stop();
+            _running = false;
         }
-
         Hide();
     }
 
-    private void OnRendering(object? sender, EventArgs e) => UpdatePosition();
-
-    private void UpdatePosition()
+    private void Follow()
     {
-        if (!NativeMethods.GetCursorPos(out var p))
+        if (_handle == IntPtr.Zero || !NativeMethods.GetCursorPos(out var p))
             return;
 
-        // Physical cursor px -> DIP, then into this window's canvas space. When this overlay
-        // runs on a DPI-unaware thread, both the cursor and the window are in one virtualized
-        // coordinate space (scale 1) and Windows handles per-monitor stretching, so this is
-        // correct across mixed-DPI monitors.
-        double cx = p.X * _dipScaleX - Left;
-        double cy = p.Y * _dipScaleY - Top;
+        // Center the window (physical px) on the cursor. GetWindowRect gives the window's
+        // current physical size, which already reflects the monitor's scale under PMv2.
+        if (!NativeMethods.GetWindowRect(_handle, out var r))
+            return;
+        int w = r.Right - r.Left;
+        int h = r.Bottom - r.Top;
 
-        double radius = _settings.OuterRadius;
-        PositionRing(Ring, cx, cy, radius);
-        if (OutlineRing.Visibility == Visibility.Visible)
-            PositionRing(OutlineRing, cx, cy, radius);
-    }
-
-    private static void PositionRing(System.Windows.Shapes.Ellipse ring, double cx, double cy, double radius)
-    {
-        Canvas.SetLeft(ring, cx - radius);
-        Canvas.SetTop(ring, cy - radius);
+        NativeMethods.SetWindowPos(_handle, NativeMethods.HWND_TOPMOST,
+            p.X - w / 2, p.Y - h / 2, 0, 0,
+            NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOACTIVATE);
     }
 }

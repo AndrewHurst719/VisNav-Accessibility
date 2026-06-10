@@ -21,7 +21,7 @@ public partial class App : Application
 
     private TaskbarIcon? _trayIcon;
     private SettingsWindow? _settingsWindow;
-    private CrosshairHost? _crosshairHost;
+    private CrosshairOverlay? _crosshair;
     private MagnifierEngine? _magnifier;
     private HotkeyManager? _hotkeys;
     private bool _magnifierActive;
@@ -56,6 +56,8 @@ public partial class App : Application
         // Tray-resident: don't quit when the last window closes.
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
+        Diagnostics.Log($"DPI awareness: {Interop.NativeMethods.GetAwarenessFromDpiAwarenessContext(Interop.NativeMethods.GetThreadDpiAwarenessContext())} (0=unaware,1=system,2=permonitor)");
+
         _settingsService = new SettingsService();
         _settings = _settingsService.Load();
 
@@ -67,8 +69,7 @@ public partial class App : Application
         };
         _trayIcon.TrayMouseDoubleClick += (_, _) => ShowSettings();
 
-        _crosshairHost = new CrosshairHost();
-        _crosshairHost.Start();
+        _crosshair = new CrosshairOverlay();
         ApplyCrosshair();
 
         _magnifier = new MagnifierEngine();
@@ -296,8 +297,17 @@ public partial class App : Application
         _magnifier.SetZoom(_settings.Magnifier.ZoomFactor);
     }
 
-    /// <summary>Pushes the current crosshair settings to the overlay thread (shows/hides it).</summary>
-    private void ApplyCrosshair() => _crosshairHost?.Apply(_settings.Crosshair);
+    /// <summary>Pushes the current crosshair settings to the overlay and shows/hides it.</summary>
+    private void ApplyCrosshair()
+    {
+        if (_crosshair is null)
+            return;
+        _crosshair.Apply(_settings.Crosshair);
+        if (_settings.Crosshair.Enabled)
+            _crosshair.Start();
+        else
+            _crosshair.Stop();
+    }
 
     private ContextMenu BuildTrayMenu()
     {
@@ -352,7 +362,8 @@ public partial class App : Application
         _readOverlay?.Close();
         _regionOverlay?.Close();
         _regionHighlight?.Close();
-        _crosshairHost?.Dispose();
+        _crosshair?.Stop();
+        _crosshair?.Close();
         _magnifier?.Dispose();
         _narrator?.Dispose();
         _hotkeys?.Dispose();
