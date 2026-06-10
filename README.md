@@ -6,7 +6,9 @@ browser, and any other app, and provides easy to operate assistive tools. Built 
 VisNav runs in the **system tray** (crosshair icon). Open **Settings** from the tray menu to
 toggle tools and rebind hotkeys.
 
-## ⬇️ Download & run (nothing to install)
+note : All code was created and compiled by Claude Code - Anthropic. I hold no ownership of the code in this repo therefor it's open source.
+
+## Download & run
 
 1. Open the **[latest release](https://github.com/AndrewHurst719/VisNav-Accessibility/releases/latest)**
    and, under **Assets**, download **`VisNav-win-x64.zip`**.
