@@ -21,7 +21,7 @@ public partial class App : Application
 
     private TaskbarIcon? _trayIcon;
     private SettingsWindow? _settingsWindow;
-    private CrosshairOverlay? _crosshair;
+    private CrosshairHost? _crosshairHost;
     private MagnifierEngine? _magnifier;
     private HotkeyManager? _hotkeys;
     private bool _magnifierActive;
@@ -67,7 +67,8 @@ public partial class App : Application
         };
         _trayIcon.TrayMouseDoubleClick += (_, _) => ShowSettings();
 
-        _crosshair = new CrosshairOverlay();
+        _crosshairHost = new CrosshairHost();
+        _crosshairHost.Start();
         ApplyCrosshair();
 
         _magnifier = new MagnifierEngine();
@@ -295,19 +296,8 @@ public partial class App : Application
         _magnifier.SetZoom(_settings.Magnifier.ZoomFactor);
     }
 
-    /// <summary>Pushes the current crosshair settings to the overlay and shows/hides it.</summary>
-    private void ApplyCrosshair()
-    {
-        if (_crosshair is null)
-            return;
-
-        _crosshair.Apply(_settings.Crosshair);
-
-        if (_settings.Crosshair.Enabled)
-            _crosshair.Start();
-        else
-            _crosshair.Stop();
-    }
+    /// <summary>Pushes the current crosshair settings to the overlay thread (shows/hides it).</summary>
+    private void ApplyCrosshair() => _crosshairHost?.Apply(_settings.Crosshair);
 
     private ContextMenu BuildTrayMenu()
     {
@@ -362,8 +352,7 @@ public partial class App : Application
         _readOverlay?.Close();
         _regionOverlay?.Close();
         _regionHighlight?.Close();
-        _crosshair?.Stop();
-        _crosshair?.Close();
+        _crosshairHost?.Dispose();
         _magnifier?.Dispose();
         _narrator?.Dispose();
         _hotkeys?.Dispose();

@@ -46,6 +46,7 @@ public partial class CrosshairOverlay : Window
         var m = source.CompositionTarget.TransformFromDevice;
         _dipScaleX = m.M11;
         _dipScaleY = m.M22;
+
     }
 
     /// <summary>Applies color / radius / thickness to the ring visuals.</summary>
@@ -115,7 +116,10 @@ public partial class CrosshairOverlay : Window
         if (!NativeMethods.GetCursorPos(out var p))
             return;
 
-        // Physical cursor px -> DIP, then into this window's canvas space.
+        // Physical cursor px -> DIP, then into this window's canvas space. When this overlay
+        // runs on a DPI-unaware thread, both the cursor and the window are in one virtualized
+        // coordinate space (scale 1) and Windows handles per-monitor stretching, so this is
+        // correct across mixed-DPI monitors.
         double cx = p.X * _dipScaleX - Left;
         double cy = p.Y * _dipScaleY - Top;
 

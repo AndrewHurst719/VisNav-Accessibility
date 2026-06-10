@@ -28,6 +28,14 @@ internal static class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool GetCursorPos(out POINT lpPoint);
 
+    // Per-thread DPI awareness. DPI_AWARENESS_CONTEXT_UNAWARE = (HANDLE)-1: the OS treats the
+    // thread's windows as 96-DPI and bitmap-stretches them per monitor, giving one uniform
+    // coordinate space — ideal for a cursor overlay that must align across mixed-DPI monitors.
+    public static readonly IntPtr DPI_AWARENESS_CONTEXT_UNAWARE = new(-1);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr dpiContext);
+
     [DllImport("user32.dll")]
     public static extern IntPtr GetForegroundWindow();
 
