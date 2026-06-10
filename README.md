@@ -1,14 +1,17 @@
 # VisNav Accessibility
 
-A Windows desktop **overlay** toolkit for people with low vision. It floats on top of the
-browser (and any other app) and provides large, easy-to-operate assistive tools. Built with
-accessibility-first design — high contrast, large targets, keyboard/hotkey driven.
-
-> Personal motivation: built for anyone who has trouble seeing. Inspired in part by a friend with
-> Stargardt's disease (central vision loss), but designed for low vision generally.
+A Windows desktop overlay toolkit for computer users with trouble seeing. It floats on top of the
+browser, and any other app, and provides easy to operate assistive tools. Built with a high skill ceiling but a low learning curve in mind and operated with keyboard/hotkeys.
 
 VisNav runs in the **system tray** (crosshair icon). Open **Settings** from the tray menu to
-toggle tools and rebind hotkeys. Only one instance runs at a time.
+toggle tools and rebind hotkeys.
+
+## Download & run
+1. Download latest release.
+2. Extract zip file in location chosen.
+3. Run "VisNav.exe".
+
+Settings are saved to `%AppData%\VisNav\settings.json`.
 
 ## Features
 
@@ -19,11 +22,10 @@ pink), **radius**, **thickness**, and **opacity**. It's excluded from screen cap
 shows up inside the magnifier or screenshots.
 
 ### Magnifier
-A GPU-accelerated lens (Windows Magnification API) that floats next to the cursor — its
-bottom-left corner sits at the pointer tip. Configurable **starting zoom** and **lens size** (drag
+A GPU-accelerated lens (Windows Magnification API) that floats next to the cursor — its corner sits at the pointer tip. Configurable **starting zoom** and **lens size** (drag
 the corner of the on-screen diagram). The magnified cursor shows inside the lens.
 
-- **Toggle:** `Ctrl + Shift + F`
+- **Toggle:** `Ctrl + Shift + F` as default
 - **Zoom while active:** hold `Shift` and scroll the mouse wheel (up = in, down = out)
 
 ### Narrator (text-to-speech)
@@ -48,22 +50,6 @@ All hotkeys are rebindable in Settings. Each tool can be toggled independently.
 - A speech voice (Windows ships with at least one) and the English OCR language pack for the
   read-a-region feature (both included by default on most installs).
 
-## Build & run
-
-From the repo root:
-
-```powershell
-./run.ps1            # Debug build, launches the tray app
-./run.ps1 -Release   # Release build
-```
-
-Or double-click **`run.cmd`**, or use the SDK directly:
-
-```powershell
-dotnet run --project src/VisNav.App/VisNav.App.csproj
-```
-
-Settings are saved to `%AppData%\VisNav\settings.json`.
 
 ## Platform & stack
 
@@ -82,5 +68,3 @@ tests/
 docs/            design notes (design.md) + narrator research (research-narrator.md)
 run.ps1 / run.cmd      build-and-launch helpers
 ```
-
-See [`docs/design.md`](docs/design.md) for architecture and the build plan.
